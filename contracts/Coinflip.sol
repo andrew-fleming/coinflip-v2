@@ -21,11 +21,11 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         uint256 headsTails;
     }
     
-    ///@dev address => winnings amount
+    /// @dev userAddress => playerWinnings amount
     mapping(address => uint256) public playerWinnings;
-    ///@dev address => Bet instance
+    /// @dev userAddress => Bet struct instance
     mapping(address => Bet) public waiting;
-    ///@dev requestId => address
+    /// @dev requestId => playerAddress
     mapping(bytes32 => address) public afterWaiting;
     
     /**
@@ -51,7 +51,9 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         }
     
     /**
-     * @notice flip is a core function of this contract. This calls the getRandomNumber function. !!CONTINUE!! 
+     * @notice flip is the core function of this contract. This calls the getRandomNumber function while setting
+     *         a struct with all the pertinent data regarding the user and their bet.
+     * 
      * @param _choice The user's choice where number zero equals heads and number one equals tails.
      */
     function flip(uint256 _choice) external override payable {
@@ -71,7 +73,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
     
     /**
-     *
+     * @notice Withdraws the msg.sender's winnings as tracked by the playerWinnings mapping.
      *
      */
     function withdrawPlayerWinnings() external override {
@@ -82,7 +84,9 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
     
     /**
-     * @param _recipient Address to increase winnings (for testing only)
+     * @notice For testing only
+     *
+     * @param _recipient Address to increase winnings
      */
     function addPlayerWinnings(address _recipient) external override payable {
         require(msg.sender == owner, "You are not the owner");
@@ -91,7 +95,8 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
     
     /**
-     *
+     * @notice The VRF requires LINK per random number query. This withdraws all LINK within 
+     *         the contract.
      */
     function withdrawLink() external override {
         require(msg.sender == owner, "You are not the owner");
@@ -100,7 +105,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
     
     /**
-     *
+     * @notice Withdraws all ETH inside contract.
      */
     function withdrawContract() external override {
         require(msg.sender == owner, "You are not the owner");
@@ -111,14 +116,15 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
 
     /**
-     *
+     * @notice Getter function for fetching the msg.sender's winnings balance.
      */
     function getWinningsBalance() external view override returns (uint256) {
         return playerWinnings[msg.sender];
     }
     
     /**
-     *
+     * @notice Getter function fetching the total ETH value inside the contract. This includes
+     *         the contract balance as well as all users' winnings.
      */
     function getTotalValue() external view override returns (uint256) {
         require(msg.sender == owner, "You are not the owner");
@@ -126,22 +132,27 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     }
 
     /**
-     *
+     * @notice Getter function that retrieves the total amount of LINK held by the contract.
      */
     function getLinkBalance() external view override returns (uint256){
         return LINK.balanceOf(address(this));
     }
 
     /**
-     *
+     * @notice Helper function that provides psuedo-randomness for the user seed required by 
+     *         Chainlink's VRF.
      */
     function getRandomNumber() internal returns (bytes32 requestId) {
-        // Pseudo-random userSeed for LINK's random function
         uint256 userSeed = uint256(keccak256(abi.encodePacked(blockhash(block.number - 1))));
         return requestRandomness(keyHash, fee, userSeed);
     }
 
     /**
+     * @notice Internal function required by Chainlink. Both, the random number and request ID are
+     *         used as params. The _player variable takes the requestId provided by Chainlink and
+     *         creates a bridge in memory for the Bet struct. Thereafter, the contract analyzes whether
+     *         the user guessed heads or tails correctly. 
+     *
      * @param _requestId Identifier that associates the random number request with a bytes32
      * @param _randomness Returned random number from Chainlink's oracle
      */
