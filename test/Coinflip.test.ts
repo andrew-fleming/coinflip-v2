@@ -3,6 +3,8 @@ import { assert, expect } from "chai"
 import { MockProvider } from "ethereum-waffle"
 import { Contract, BigNumber } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { smockit } from '@eth-optimism/smock'
+import { kovanConfig } from "../scripts/config"
 
 describe("Coinflip Contract", () => {
     let res: any;
@@ -25,21 +27,15 @@ describe("Coinflip Contract", () => {
     //})
     //const [wallet, other] = provider.getWallets()
 
-    // KOVAN
-    let kCoorAddr: string = "0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9"
-    let kLinkAddr: string = "0xa36085F69e2889c224210F603D836748e7dC0088"
-    let kKeyHash: string = "0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4"
-    let kFee: BigNumber = ethers.utils.parseEther(".1")
-
     before(async() => {
         const Coinflip = await ethers.getContractFactory("Coinflip");
         [alice, bob, carol, dave, eve] = await ethers.getSigners();
-        
-        config = {
+
+        const fundContract = {
             value: ethers.utils.parseEther("2")
         }
 
-        instance = await Coinflip.deploy(kCoorAddr, kLinkAddr, kKeyHash, kFee, config);
+        instance = await Coinflip.deploy(...kovanConfig, fundContract);
     })
 
     describe("check init", async() => {
