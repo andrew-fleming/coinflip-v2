@@ -1,4 +1,4 @@
-pragma solidity =0.8.3;
+pragma solidity =0.8.4;
 
 import "./ICoinflip.sol";
 import "@chainlink/contracts/src/v0.8/dev/VRFConsumerBase.sol";
@@ -27,6 +27,10 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     mapping(address => Bet) public waiting;
     /// @dev requestId => playerAddress
     mapping(bytes32 => address) public afterWaiting;
+
+    event BetInit(address indexed player, uint256 indexed amount, uint256 choice);
+    event Outcome(address indexed player, string description, uint256 amount);
+    event Withdraw(address indexed player, uint256 indexed amount);
     
     /**
      * @param _coorAddr Chainlink's VRF coordinator address
@@ -70,6 +74,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         newBetter.requestId = requestId;
 
         waiting[msg.sender] = newBetter;
+        emit BetInit(msg.sender, msg.value, _choice);
     }
     
     /**
@@ -81,6 +86,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         uint256 toTransfer = playerWinnings[msg.sender];
         playerWinnings[msg.sender] = 0;
         payable(msg.sender).transfer(toTransfer);
+        emit Withdraw(msg.sender, toTransfer);
     }
     
     /**
@@ -112,7 +118,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         uint256 toTransfer = contractBalance;
         contractBalance = 0;
         payable(owner).transfer(toTransfer);
-        // EMIT EVENT
+        emit Withdraw(msg.sender, toTransfer);
     }
 
     /**
@@ -166,10 +172,12 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
             uint winAmount = postBet.betAmount * 2;
             contractBalance -= postBet.betAmount;
             playerWinnings[_player] += winAmount;
+            emit Outcome(_player, "Winner", winAmount);
             
         } else {
             //loser
             contractBalance += postBet.betAmount;
+            emit Outcome(_player, "Loser", postBet.betAmount);
         }     
     }
     

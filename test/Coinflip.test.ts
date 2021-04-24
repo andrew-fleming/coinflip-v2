@@ -1,9 +1,8 @@
 import { ethers } from "hardhat";
 import { assert, expect } from "chai"
 import { MockProvider } from "ethereum-waffle"
-import { Contract, BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { smockit } from '@eth-optimism/smock'
 import { kovanConfig } from "../scripts/config"
 
 describe("Coinflip Contract", () => {
@@ -72,6 +71,43 @@ describe("Coinflip Contract", () => {
             expect(await instance.contractBalance()).to.equal(ethers.utils.parseEther("2"))
             await instance.withdrawContract()
             expect(await instance.contractBalance()).to.equal(0)
+        })
+    })
+})
+
+describe("Redeploy Coinflip Contract", () => {
+    let res: any;
+    let config: object;
+    let instance: Contract;
+    let alice: SignerWithAddress;
+    let bob: SignerWithAddress;
+
+    before(async() => {
+        const Coinflip = await ethers.getContractFactory("Coinflip");
+        [alice, bob] = await ethers.getSigners();
+
+        const fundContract = {
+            value: ethers.utils.parseEther("2")
+        }
+
+        instance = await Coinflip.deploy(...kovanConfig, fundContract);
+    })
+
+    describe("Events", async() => {
+        it("should emit a Withdraw event from winnings", async() => {
+            config = {
+                value: ethers.utils.parseEther(".5")
+            }
+            await instance.addPlayerWinnings(alice.address, config)
+            expect(await instance.withdrawPlayerWinnings())
+                .to.emit(instance, "Withdraw")
+                .withArgs(alice.address, ethers.utils.parseEther(".5"))
+        })
+
+        it("should emit a Withdraw event from contract", async() => {
+            expect(await instance.withdrawContract())
+                .to.emit(instance, "Withdraw")
+                .withArgs(alice.address, ethers.utils.parseEther("2"))
         })
     })
 })
