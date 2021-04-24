@@ -3,19 +3,14 @@ import { assert, expect } from "chai"
 import { MockProvider } from "ethereum-waffle"
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { kovanConfig } from "../scripts/config"
+import { kovanConfig, mumbaiConfig, rinkebyConfig } from "../scripts/config"
 
 describe("Coinflip Contract", () => {
     let res: any;
-    let res2: any;
-    let res3: any;
     let config: object;
     let instance: Contract;
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
-    let carol: SignerWithAddress;
-    let dave: SignerWithAddress;
-    let eve: SignerWithAddress;
 
     //const provider = new MockProvider({
     //    ganacheOptions: {
@@ -28,7 +23,7 @@ describe("Coinflip Contract", () => {
 
     before(async() => {
         const Coinflip = await ethers.getContractFactory("Coinflip");
-        [alice, bob, carol, dave, eve] = await ethers.getSigners();
+        [alice, bob] = await ethers.getSigners();
 
         const fundContract = {
             value: ethers.utils.parseEther("2")
@@ -76,7 +71,6 @@ describe("Coinflip Contract", () => {
 })
 
 describe("Redeploy Coinflip Contract", () => {
-    let res: any;
     let config: object;
     let instance: Contract;
     let alice: SignerWithAddress;
