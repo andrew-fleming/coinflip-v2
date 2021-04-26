@@ -18,7 +18,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         address playerAddress;
         bytes32 requestId;
         uint256 betAmount; 
-        uint256 headsTails;
+        uint8 headsTails;
     }
     
     /// @dev userAddress => playerWinnings amount
@@ -28,7 +28,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
     /// @dev requestId => playerAddress
     mapping(bytes32 => address) public afterWaiting;
 
-    event BetInit(address indexed player, uint256 indexed amount, uint256 choice);
+    event BetInit(address indexed player, uint256 indexed amount, uint8 choice);
     event Outcome(address indexed player, string description, uint256 amount);
     event Withdraw(address indexed player, uint256 indexed amount);
     
@@ -60,7 +60,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
      * 
      * @param _choice The user's choice where number zero equals heads and number one equals tails.
      */
-    function flip(uint256 _choice) external override payable {
+    function flip(uint8 _choice) external override payable {
         require(msg.value > 0, "You need to place a bet");
         require(_choice < 2, "Must be heads or tails");
         bytes32 requestId = getRandomNumber();
@@ -169,7 +169,7 @@ contract Coinflip is ICoinflip, VRFConsumerBase {
         Bet memory postBet = waiting[_player];
         if(randomNum == postBet.headsTails){
             //winner
-            uint winAmount = postBet.betAmount * 2;
+            uint256 winAmount = postBet.betAmount * 2;
             contractBalance -= postBet.betAmount;
             playerWinnings[_player] += winAmount;
             emit Outcome(_player, "Winner", winAmount);

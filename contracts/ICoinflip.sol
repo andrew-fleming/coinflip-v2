@@ -2,7 +2,7 @@ pragma solidity =0.8.4;
 
 interface ICoinflip {
     
-    function flip(uint256) external payable;
+    function flip(uint8) external payable;
     function withdrawPlayerWinnings() external;
     function withdrawContract() external;
     function withdrawLink() external;
