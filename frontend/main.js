@@ -1,6 +1,3 @@
-//Moralis.initialize("Qmat4iPy7apkfHvGjUuZ46ZO0qPcXgYGW42fthON")
-//Moralis.serverURL = "https://csqg51vkg0kz.moralis.io:2053/server"
-//const CONTRACT_ADDRESS = "0xB9C7b15aB1BC2A49f09142F815a2265459E9c028"
 Moralis.initialize("<INSERT_API_KEY_HERE")
 Moralis.serverURL = "<INSERT_SERVER_URL_HERE"
 const CONTRACT_ADDRESS = "<INSERT_CONTRACT_ADDRESS_HERE>"
@@ -10,7 +7,7 @@ function fromWei(num){
 }
 
 function toWei(num){
-    return num * (10**18)
+    return num * (10 ** 18)
 }
 
 async function renderApp() {
