@@ -13,7 +13,7 @@ async function main() {
     console.log(`Account balance: ${balance.toString()}`);
 
     const Coinflip = await ethers.getContractFactory("Coinflip");
-    const coinflip = await Coinflip.deploy(...kovanConfig, fundContract);
+    const coinflip = await Coinflip.deploy(...rinkebyConfig, fundContract);
     console.log(`Coinflip address: ${coinflip.address}`)
 }
 
